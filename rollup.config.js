@@ -12,7 +12,7 @@ export default {
     format: 'cjs', // CommonJS format for Obsidian plugins
     exports: 'default',
   },
-  external: ['obsidian'], // Mark 'obsidian' as an external dependency (provided by Obsidian)
+  external: [(id) => id === 'obsidian'],
   plugins: [
     typescript(), // Transpile TypeScript
     nodeResolve({ browser: true }), // Resolve node modules for browser environment

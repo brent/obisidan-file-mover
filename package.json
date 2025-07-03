@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "An Obsidian plugin to move files based on a checkbox frontmatter property.",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production"
@@ -30,5 +31,8 @@
     "rollup": "^4.18.0",
     "tslib": "^2.6.3",
     "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "date-fns-tz": "^3.2.0"
   }
 }

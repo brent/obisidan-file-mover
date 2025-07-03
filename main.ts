@@ -1,5 +1,6 @@
 // main.ts
-import { App, Plugin, PluginSettingTab, Setting, TFile, Vault } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { formatInTimeZone } from 'date-fns-tz';
 
 // Define the interface for our plugin settings
 interface FileMoverPluginSettings {
@@ -21,7 +22,7 @@ const DEFAULT_SETTINGS: FileMoverPluginSettings = {
 
 // Main plugin class
 export default class FileMoverPlugin extends Plugin {
-  settings: FileMoverPluginSettings;
+  settings: FileMoverPluginSettings = DEFAULT_SETTINGS;
 
   /**
    * Called when the plugin is loaded.
@@ -34,7 +35,7 @@ export default class FileMoverPlugin extends Plugin {
     // ✅ FIX: Use the 'metadataCache.changed' event for instant frontmatter updates.
     // This is more reliable than 'vault.modify'.
     this.registerEvent(
-      this.app.metadataCache.on('changed', async (file, data, cache) => {
+      this.app.metadataCache.on('changed', async (file) => {
         // This event gives us the file that changed, which is all we need.
         await this.processFile(file);
       })
@@ -122,7 +123,8 @@ export default class FileMoverPlugin extends Plugin {
           await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
             if (!frontmatter[completedDatePropertyName]) {
               const now = new Date();
-              frontmatter[completedDatePropertyName] = now.toISOString();
+              const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              frontmatter[completedDatePropertyName] = formatInTimeZone(now, timeZone, "yyyy-MM-dd'T'HH:mm:ssXXX");
             }
           });
         } else if (propertyValue === false) {
