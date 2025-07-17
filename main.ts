@@ -9,6 +9,7 @@ interface FileMoverPluginSettings {
   falseFolder: string;
   enableCompletedDate: boolean;
   completedDatePropertyName: string;
+  restrictedPath: string;
 }
 
 // Define default settings for the plugin
@@ -18,6 +19,7 @@ const DEFAULT_SETTINGS: FileMoverPluginSettings = {
   falseFolder: '01 - Inbox',
   enableCompletedDate: false,
   completedDatePropertyName: 'completed_date',
+  restrictedPath: '',
 };
 
 // Main plugin class
@@ -75,7 +77,11 @@ export default class FileMoverPlugin extends Plugin {
     this.processing.add(originalPath);
 
     try {
-      const { propertyName, trueFolder, falseFolder, enableCompletedDate, completedDatePropertyName } = this.settings;
+      const { propertyName, trueFolder, falseFolder, enableCompletedDate, completedDatePropertyName, restrictedPath } = this.settings;
+
+      if (restrictedPath && !originalPath.startsWith(restrictedPath)) {
+        return;
+      }
 
       if (!propertyName || !trueFolder || !falseFolder) {
         console.warn('Obsidian File Mover Plugin: Settings are incomplete.');
@@ -187,6 +193,17 @@ class FileMoverSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.falseFolder)
         .onChange(async (value) => {
           this.plugin.settings.falseFolder = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName('Restricted Path')
+      .setDesc('Only move files under this path. Leave empty to allow all paths.')
+      .addText(text => text
+        .setPlaceholder('e.g. 03 - Projects')
+        .setValue(this.plugin.settings.restrictedPath)
+        .onChange(async (value) => {
+          this.plugin.settings.restrictedPath = value;
           await this.plugin.saveSettings();
         }));
 
